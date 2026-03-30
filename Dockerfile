@@ -11,7 +11,8 @@ RUN apt-get update \
 
 RUN groupadd -r appuser \
     && useradd -r -m -d /app -g appuser appuser \
-    && mkdir -p /app/.cache
+    && mkdir -p /app/.cache \
+    && chown appuser:appuser /app /app/.cache
 
 COPY --chown=appuser:appuser requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
