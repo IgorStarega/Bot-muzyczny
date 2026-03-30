@@ -14,4 +14,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY bot.py ./
 
+RUN groupadd -r appuser \
+    && useradd -r -g appuser appuser \
+    && chown -R appuser:appuser /app
+
+USER appuser
+
 CMD ["python", "bot.py"]
