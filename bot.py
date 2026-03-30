@@ -1,6 +1,8 @@
 import os
 import asyncio
+import logging
 import discord
+import yt_dlp
 from discord.ext import commands
 
 PREFIX = os.getenv("PREFIX", "!")
@@ -9,6 +11,7 @@ TOKEN = os.getenv("DISCORD_TOKEN")
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix=PREFIX, intents=intents)
+logger = logging.getLogger(__name__)
 
 YTDL_FORMAT_OPTIONS = {
     "format": "bestaudio/best",
@@ -29,8 +32,6 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
     @classmethod
     async def from_url(cls, url, *, loop=None):
-        import yt_dlp
-
         loop = loop or asyncio.get_running_loop()
         ytdl = yt_dlp.YoutubeDL(YTDL_FORMAT_OPTIONS)
         data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
@@ -84,8 +85,9 @@ async def play(ctx, *, url: str):
         player = await YTDLSource.from_url(url)
         ctx.voice_client.play(player)
         await ctx.send(f"Teraz gra: {player.title}")
-    except Exception as exc:
-        await ctx.send(f"Błąd odtwarzania: {exc}")
+    except Exception:
+        logger.exception("Błąd podczas odtwarzania utworu")
+        await ctx.send("Nie udało się odtworzyć utworu. Spróbuj ponownie za chwilę.")
 
 
 @bot.command(name="pause")
@@ -119,6 +121,7 @@ async def stop(ctx):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     if not TOKEN:
         raise RuntimeError("Brak DISCORD_TOKEN w zmiennych środowiskowych")
     bot.run(TOKEN)
