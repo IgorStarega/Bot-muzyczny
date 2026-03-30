@@ -23,11 +23,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set image name
+        id: image
+        run: echo "image=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/bot-muzyczny" >> "$GITHUB_OUTPUT"
+
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository_owner }}/bot-muzyczny
+          images: ${{ steps.image.outputs.image }}
           tags: |
             type=ref,event=branch
             type=sha

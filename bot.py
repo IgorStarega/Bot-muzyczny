@@ -44,7 +44,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
 @bot.event
 async def on_ready():
-    print(f"Logged in as {bot.user}")
+    logger.info("Logged in as %s", bot.user)
 
 
 @bot.command(name="join")
