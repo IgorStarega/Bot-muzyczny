@@ -9,14 +9,17 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt ./
+RUN groupadd -r appuser \
+    && useradd -r -m -d /app -g appuser appuser \
+    && mkdir -p /app/.cache
+
+COPY --chown=appuser:appuser requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY bot.py ./
+COPY --chown=appuser:appuser bot.py ./
 
-RUN groupadd -r appuser \
-    && useradd -r -g appuser appuser \
-    && chown -R appuser:appuser /app
+ENV HOME=/app \
+    XDG_CACHE_HOME=/app/.cache
 
 USER appuser
 
